@@ -5,25 +5,33 @@ import os
 import json
 import wandb
 
+# =====================================================
 # PAGE CONFIG
+# =====================================================
 st.set_page_config(
     page_title="MediBill AI",
     page_icon="🏥",
     layout="centered"
 )
 
-# W&B INIT
+# =====================================================
+# W&B INIT (safe even if AI fails)
+# =====================================================
 wandb.init(
     project="medibill-ai",
     name="billing-insurance-monitoring",
     reinit=True
 )
 
+# =====================================================
 # GEMINI SETUP
+# =====================================================
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel("models/gemini-2.0-flash")
 
+# =====================================================
 # SAFE JSON EXTRACTOR
+# =====================================================
 def extract_json(text):
     try:
         text = text.strip()
@@ -37,12 +45,16 @@ def extract_json(text):
     except Exception:
         return None
 
-# HARD-CACHED GEMINI CALL (KEY FIX)
+# =====================================================
+# HARD-CACHED GEMINI CALL (CRITICAL)
+# =====================================================
 @st.cache_data(show_spinner=False)
 def call_gemini(prompt: str) -> str:
     return model.generate_content(prompt).text
 
-# IMAGE PROMPT 
+# =====================================================
+# SAFE IMAGE PROMPT (NON-CRITICAL)
+# =====================================================
 @st.cache_data(show_spinner=False)
 def generate_image_prompt(item, category):
     prompt = f"""
@@ -51,9 +63,14 @@ Item: {item}
 Category: {category}
 Rules: flat style, clean medical setting, no patients, no blood, no diagnosis.
 """
-    return call_gemini(prompt)
+    try:
+        return call_gemini(prompt)
+    except Exception:
+        return None
 
+# =====================================================
 # DATABASE
+# =====================================================
 def get_bill_items():
     conn = sqlite3.connect("medibill.db")
     cur = conn.cursor()
@@ -62,12 +79,16 @@ def get_bill_items():
     conn.close()
     return [{"item_name": r[0], "category": r[1], "cost": r[2]} for r in rows]
 
+# =====================================================
 # HEADER
+# =====================================================
 st.title("🏥 MediBill AI")
 st.caption("Clear explanations and insurance awareness for hospital bills.")
 st.divider()
 
+# =====================================================
 # USER OPTIONS
+# =====================================================
 c1, c2 = st.columns(2)
 
 with c1:
@@ -76,20 +97,26 @@ with c1:
 with c2:
     family_mode = st.checkbox("👨‍👩‍👧 Simple explanation")
 
+# =====================================================
 # INSURANCE LEGEND
-st.markdown("---🛡️ Insurance Guide---")
+# =====================================================
+st.markdown("### 🛡️ Insurance Guide")
 l1, l2, l3 = st.columns(3)
 l1.markdown("🟢 Often covered")
 l2.markdown("🟡 Policy dependent")
 l3.markdown("🔴 Often not covered")
 st.divider()
 
+# =====================================================
 # BILL DATA
+# =====================================================
 bill_items = get_bill_items()
 st.metric("💰 Total Bill (₹)", sum(i["cost"] for i in bill_items))
 st.divider()
 
-# MAIN LOOP
+# =====================================================
+# MAIN LOOP (CLICK SAFE)
+# =====================================================
 for item in bill_items:
     item_id = item["item_name"]
 
@@ -98,20 +125,33 @@ for item in bill_items:
     st.write(f"Cost: ₹{item['cost']}")
 
     colA, colB = st.columns(2)
-    with colA:
-        if st.button("🖼️ Illustration Info", key=f"img_{item_id}"):
-            st.text_area(
-                "Illustration description",
-                generate_image_prompt(item_id, item["category"]),
-                height=120
-            )
-            st.caption("Educational visual reference only.")
 
-    #EXPLAIN BUTTON
+    # ---------- IMAGE PROMPT ----------
+    with colA:
+        if st.button("🖼️ Illustration info", key=f"img_{item_id}"):
+            img_prompt = generate_image_prompt(item_id, item["category"])
+            if img_prompt:
+                st.text_area(
+                    "Illustration description",
+                    img_prompt,
+                    height=120
+                )
+                st.caption("Educational visual reference only.")
+            else:
+                st.info(
+                    "🖼️ Illustration generation is temporarily unavailable "
+                    "due to AI usage limits."
+                )
+
+    # ---------- EXPLAIN BUTTON (LOCKED) ----------
     with colB:
         if st.button("🧠 Explain", key=f"btn_{item_id}"):
             st.session_state[f"show_{item_id}"] = True
+
+    # ---------- EXPLANATION (ONLY ONCE PER ITEM) ----------
     if st.session_state.get(f"show_{item_id}"):
+
+        # ---- Short language rule ----
         lang_rule = ""
         if language == "English":
             lang_rule = "Language: English."
@@ -120,17 +160,18 @@ for item in bill_items:
         elif language == "Bengali":
             lang_rule = "Language: Bengali (বাংলা only)."
 
+        # ---- Optimised core prompt ----
         prompt = f"""
 You are MediBill AI.
 {lang_rule}
 
-Explain and classify insurance.
+Explain this bill item and classify insurance.
 
 Item: {item_id}
 Category: {item['category']}
 Cost: ₹{item['cost']}
 
-JSON only:
+Respond ONLY in JSON:
 {{
  "explanation": "...",
  "insurance_status": "LIKELY_COVERED|PARTIALLY_COVERED|NOT_COVERED",
@@ -143,8 +184,8 @@ JSON only:
             raw = call_gemini(prompt)
         except Exception:
             st.warning(
-                "⚠️ AI usage limit reached.\n"
-                "Showing demo-safe behavior."
+                "⚠️ AI usage limit reached. "
+                "Using cached or demo-safe behaviour."
             )
             st.stop()
 
@@ -154,28 +195,6 @@ JSON only:
             st.code(raw)
             st.stop()
 
+        # ---- Insurance display ----
         status = result["insurance_status"]
-        if status == "LIKELY_COVERED":
-            st.markdown("🟢 Often covered by insurance")
-        elif status == "PARTIALLY_COVERED":
-            st.markdown("🟡 Coverage depends on policy")
-        else:
-            st.markdown("🔴 Often not covered")
-
-        st.write(result["explanation"])
-        st.info(result["insurance_note"])
-        st.caption("Educational use only. Not medical or insurance advice.")
-
-        # Safe logging
-        wandb.log({
-            "item": item_id,
-            "insurance_status": status,
-            "language": language
-        })
-
-    st.divider()
-
-# FOOTER
-st.caption(
-    "MediBill AI demonstrates responsible GenAI usage for healthcare billing transparency."
-)
+        if status == "LIKELY_COVERED_
