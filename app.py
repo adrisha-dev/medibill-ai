@@ -11,6 +11,86 @@ st.set_page_config(
     page_icon="🏥",
     layout="centered"
 )
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+/* Page background */
+.stApp {
+    background-color: #F5F7FB;
+    color: #1F2937;
+    font-family: 'Inter', sans-serif;
+}
+
+/* Main content width */
+.block-container {
+    max-width: 880px;
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+}
+
+/* Titles */
+h1 {
+    font-weight: 600;
+    color: #0F172A;
+}
+
+h2, h3 {
+    font-weight: 500;
+    color: #1E293B;
+}
+
+/* Subtle card style */
+section[data-testid="stVerticalBlock"] > div {
+    background: #FFFFFF;
+    border-radius: 14px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 1.2rem;
+    border: 1px solid #E5E7EB;
+}
+
+/* Buttons */
+.stButton button {
+    background-color: #2563EB;
+    color: white;
+    border-radius: 10px;
+    padding: 0.55rem 1.3rem;
+    font-weight: 500;
+    border: none;
+}
+
+.stButton button:hover {
+    background-color: #1D4ED8;
+}
+
+/* Metric card */
+[data-testid="stMetric"] {
+    background: #FFFFFF;
+    border-radius: 14px;
+    padding: 1.2rem;
+    border: 1px solid #E5E7EB;
+}
+
+/* Alerts */
+.stAlert {
+    border-radius: 12px;
+    border: 1px solid #E5E7EB;
+}
+
+/* Inputs */
+textarea, select, input {
+    border-radius: 8px !important;
+    border: 1px solid #D1D5DB !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* Captions */
+.stCaption {
+    color: #6B7280;
+    font-size: 0.85rem;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # W&B INIT
 try:
