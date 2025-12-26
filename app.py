@@ -56,12 +56,9 @@ def safe_gemini(prompt):
 # CUSTOM CSS FOR BEAUTIFUL STYLING
 st.markdown("""
 <style>
-    /* Import Google Fonts for varied font styles */
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@300;400;600&display=swap');
-    
     /* Full-page background with subtle pattern overlay */
     body {
-        font-family: 'Roboto', sans-serif;
+        font-family: Arial, Helvetica, sans-serif;  /* Web-safe fallback for Roboto */
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         background-attachment: fixed;
         background-size: cover;
@@ -98,7 +95,7 @@ st.markdown("""
     
     /* Title styling with varied font */
     .stTitle {
-        font-family: 'Poppins', sans-serif;
+        font-family: Arial, Helvetica, sans-serif;  /* Web-safe fallback for Poppins */
         font-weight: 600;
         color: #2c3e50;
         text-align: center;
@@ -108,7 +105,7 @@ st.markdown("""
     
     /* Caption styling with lighter weight */
     .stCaption {
-        font-family: 'Roboto', sans-serif;
+        font-family: Arial, Helvetica, sans-serif;  /* Web-safe fallback for Roboto */
         font-weight: 300;
         color: #7f8c8d;
         font-style: italic;
@@ -147,7 +144,7 @@ st.markdown("""
     
     /* Subheader styling with varied font */
     .stSubheader {
-        font-family: 'Poppins', sans-serif;
+        font-family: Arial, Helvetica, sans-serif;  /* Web-safe fallback for Poppins */
         font-weight: 400;
         color: #34495e;
         border-left: 5px solid #2ecc71;
@@ -181,7 +178,7 @@ st.markdown("""
         border: 1px solid #dee2e6;
         border-radius: 10px;
         padding: 15px;
-        font-family: 'Roboto', sans-serif;
+        font-family: Arial, Helvetica, sans-serif;  /* Web-safe fallback for Roboto */
         font-size: 1em;
         resize: vertical;
     }
