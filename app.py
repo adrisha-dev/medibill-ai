@@ -11,70 +11,63 @@ st.set_page_config(
     page_icon="🏥",
     layout="centered"
 )
+
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 
-/* Page background */
-.stApp {
-    background-color: #F5F7FB;
-    color: #1F2937;
-    font-family: 'Inter', sans-serif;
+/* FORCE global style */
+:root, .stApp {
+    background-color: #F5F7FB !important;
+    color: #1F2937 !important;
+    font-family: 'Inter', sans-serif !important;
 }
 
-/* Main content width */
+/* Main container */
 .block-container {
-    max-width: 880px;
-    padding-top: 2.5rem;
-    padding-bottom: 2.5rem;
+    max-width: 900px !important;
+    padding-top: 2.5rem !important;
+    padding-bottom: 2.5rem !important;
 }
 
-/* Titles */
+/* Headings */
 h1 {
-    font-weight: 600;
-    color: #0F172A;
+    font-weight: 600 !important;
+    color: #0F172A !important;
 }
-
 h2, h3 {
-    font-weight: 500;
-    color: #1E293B;
+    font-weight: 500 !important;
+    color: #1E293B !important;
 }
 
-/* Subtle card style */
+/* Cards */
 section[data-testid="stVerticalBlock"] > div {
-    background: #FFFFFF;
-    border-radius: 14px;
-    padding: 1.2rem 1.4rem;
-    margin-bottom: 1.2rem;
-    border: 1px solid #E5E7EB;
+    background: white !important;
+    border-radius: 14px !important;
+    padding: 1.2rem 1.4rem !important;
+    margin-bottom: 1.2rem !important;
+    border: 1px solid #E5E7EB !important;
 }
 
 /* Buttons */
 .stButton button {
-    background-color: #2563EB;
-    color: white;
-    border-radius: 10px;
-    padding: 0.55rem 1.3rem;
-    font-weight: 500;
-    border: none;
+    background-color: #2563EB !important;
+    color: white !important;
+    border-radius: 10px !important;
+    padding: 0.55rem 1.3rem !important;
+    font-weight: 500 !important;
+    border: none !important;
 }
-
 .stButton button:hover {
-    background-color: #1D4ED8;
+    background-color: #1D4ED8 !important;
 }
 
-/* Metric card */
+/* Metric */
 [data-testid="stMetric"] {
-    background: #FFFFFF;
-    border-radius: 14px;
-    padding: 1.2rem;
-    border: 1px solid #E5E7EB;
-}
-
-/* Alerts */
-.stAlert {
-    border-radius: 12px;
-    border: 1px solid #E5E7EB;
+    background: white !important;
+    border-radius: 14px !important;
+    padding: 1.2rem !important;
+    border: 1px solid #E5E7EB !important;
 }
 
 /* Inputs */
@@ -86,8 +79,8 @@ textarea, select, input {
 
 /* Captions */
 .stCaption {
-    color: #6B7280;
-    font-size: 0.85rem;
+    color: #6B7280 !important;
+    font-size: 0.85rem !important;
 }
 </style>
 """, unsafe_allow_html=True)
