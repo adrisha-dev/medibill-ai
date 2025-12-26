@@ -1,0 +1,39 @@
+_wandb:
+    value:
+        cli_version: 0.23.1
+        e:
+            jp8zl72u8fm7bcmwnm75rk8dok5jcflr:
+                codePath: app.py
+                codePathLocal: app.py
+                cpu_count: 10
+                cpu_count_logical: 12
+                disk:
+                    /:
+                        total: "254531670016"
+                        used: "111233597440"
+                email: biswassaswati10@gmail.com
+                executable: C:\Users\ADRISHA\AppData\Local\Python\pythoncore-3.14-64\python.exe
+                host: LAPTOP-Q46744I7
+                memory:
+                    total: "16780451840"
+                os: Windows-11-10.0.26100-SP0
+                program: app.py
+                python: CPython 3.14.2
+                root: C:\Users\ADRISHA\Documents\medibill-ai
+                startedAt: "2025-12-26T04:16:54.659028Z"
+                writerId: jp8zl72u8fm7bcmwnm75rk8dok5jcflr
+        m: []
+        python_version: 3.14.2
+        t:
+            "3":
+                - 13
+                - 16
+                - 24
+            "4": 3.14.2
+            "5": 0.23.1
+            "8":
+                - 3
+            "12": 0.23.1
+            "13": windows-amd64
+model:
+    value: gemini

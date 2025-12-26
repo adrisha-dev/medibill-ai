@@ -1,0 +1,50 @@
+[34m[1mwandb[0m: wandb.init() called while a run is active and reinit is set to 'default', so returning the previous run.
+[34m[1mwandb[0m: wandb.init() called while a run is active and reinit is set to 'default', so returning the previous run.
+2025-12-26 09:37:53.884 Script compilation error
+Traceback (most recent call last):
+  File "C:\Users\ADRISHA\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\streamlit\runtime\scriptrunner\script_runner.py", line 573, in _run_script
+    code = self._script_cache.get_bytecode(script_path)
+  File "C:\Users\ADRISHA\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\streamlit\runtime\scriptrunner\script_cache.py", line 72, in get_bytecode
+    filebody = magic.add_magic(filebody, script_path)
+  File "C:\Users\ADRISHA\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\streamlit\runtime\scriptrunner\magic.py", line 45, in add_magic
+    tree = ast.parse(code, script_path, "exec")
+  File "C:\Users\ADRISHA\AppData\Local\Python\pythoncore-3.14-64\Lib\ast.py", line 46, in parse
+    return compile(source, filename, mode, flags,
+                   _feature_version=feature_version, optimize=optimize)
+  File "C:\Users\ADRISHA\Documents\medibill-ai\app.py", line 154
+    except Exception as e:
+    ^^^^^^
+SyntaxError: invalid syntax
+2025-12-26 09:37:53.891 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2025-12-26 09:38:01.041 Script compilation error
+Traceback (most recent call last):
+  File "C:\Users\ADRISHA\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\streamlit\runtime\scriptrunner\script_runner.py", line 573, in _run_script
+    code = self._script_cache.get_bytecode(script_path)
+  File "C:\Users\ADRISHA\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\streamlit\runtime\scriptrunner\script_cache.py", line 72, in get_bytecode
+    filebody = magic.add_magic(filebody, script_path)
+  File "C:\Users\ADRISHA\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\streamlit\runtime\scriptrunner\magic.py", line 45, in add_magic
+    tree = ast.parse(code, script_path, "exec")
+  File "C:\Users\ADRISHA\AppData\Local\Python\pythoncore-3.14-64\Lib\ast.py", line 46, in parse
+    return compile(source, filename, mode, flags,
+                   _feature_version=feature_version, optimize=optimize)
+  File "C:\Users\ADRISHA\Documents\medibill-ai\app.py", line 154
+    except Exception as e:
+    ^^^^^^
+SyntaxError: invalid syntax
+2025-12-26 09:38:01.049 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.
+2025-12-26 09:38:18.732 Script compilation error
+Traceback (most recent call last):
+  File "C:\Users\ADRISHA\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\streamlit\runtime\scriptrunner\script_runner.py", line 573, in _run_script
+    code = self._script_cache.get_bytecode(script_path)
+  File "C:\Users\ADRISHA\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\streamlit\runtime\scriptrunner\script_cache.py", line 72, in get_bytecode
+    filebody = magic.add_magic(filebody, script_path)
+  File "C:\Users\ADRISHA\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\streamlit\runtime\scriptrunner\magic.py", line 45, in add_magic
+    tree = ast.parse(code, script_path, "exec")
+  File "C:\Users\ADRISHA\AppData\Local\Python\pythoncore-3.14-64\Lib\ast.py", line 46, in parse
+    return compile(source, filename, mode, flags,
+                   _feature_version=feature_version, optimize=optimize)
+  File "C:\Users\ADRISHA\Documents\medibill-ai\app.py", line 154
+    except Exception as e:
+    ^^^^^^
+SyntaxError: invalid syntax
+2025-12-26 09:38:18.738 Thread 'MainThread': missing ScriptRunContext! This warning can be ignored when running in bare mode.

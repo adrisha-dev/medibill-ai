@@ -1,0 +1,24 @@
+{
+  "os":  "Windows-11-10.0.26100-SP0",
+  "python":  "CPython 3.14.2",
+  "startedAt":  "2025-12-26T04:24:04.420664Z",
+  "program":  "app.py",
+  "codePath":  "app.py",
+  "codePathLocal":  "app.py",
+  "email":  "biswassaswati10@gmail.com",
+  "root":  "C:\\Users\\ADRISHA\\Documents\\medibill-ai",
+  "host":  "LAPTOP-Q46744I7",
+  "executable":  "C:\\Users\\ADRISHA\\AppData\\Local\\Python\\pythoncore-3.14-64\\python.exe",
+  "cpu_count":  10,
+  "cpu_count_logical":  12,
+  "disk":  {
+    "/":  {
+      "total":  "254531670016",
+      "used":  "111243993088"
+    }
+  },
+  "memory":  {
+    "total":  "16780451840"
+  },
+  "writerId":  "hya2hvpldv7q4uwoepq32nvs4pyse7wv"
+}

@@ -1,0 +1,21 @@
+2025-12-26 05:17:23,926 INFO    ScriptRunner.scriptThread:1616 [wandb_setup.py:_flush():80] Current SDK version is 0.23.1
+2025-12-26 05:17:23,926 INFO    ScriptRunner.scriptThread:1616 [wandb_setup.py:_flush():80] Configure stats pid to 1616
+2025-12-26 05:17:23,927 INFO    ScriptRunner.scriptThread:1616 [wandb_setup.py:_flush():80] Loading settings from C:\Users\ADRISHA\.config\wandb\settings
+2025-12-26 05:17:23,927 INFO    ScriptRunner.scriptThread:1616 [wandb_setup.py:_flush():80] Loading settings from C:\Users\ADRISHA\Documents\medibill-ai\wandb\settings
+2025-12-26 05:17:23,928 INFO    ScriptRunner.scriptThread:1616 [wandb_setup.py:_flush():80] Loading settings from environment variables
+2025-12-26 05:17:23,929 INFO    ScriptRunner.scriptThread:1616 [wandb_init.py:setup_run_log_directory():714] Logging user logs to C:\Users\ADRISHA\Documents\medibill-ai\wandb\run-20251226_051723-3fexg6hm\logs\debug.log
+2025-12-26 05:17:23,930 INFO    ScriptRunner.scriptThread:1616 [wandb_init.py:setup_run_log_directory():715] Logging internal logs to C:\Users\ADRISHA\Documents\medibill-ai\wandb\run-20251226_051723-3fexg6hm\logs\debug-internal.log
+2025-12-26 05:17:23,930 INFO    ScriptRunner.scriptThread:1616 [wandb_init.py:init():841] calling init triggers
+2025-12-26 05:17:23,930 INFO    ScriptRunner.scriptThread:1616 [wandb_init.py:init():846] wandb.init called with sweep_config: {}
+config: {'model': 'gemini', '_wandb': {}}
+2025-12-26 05:17:23,931 INFO    ScriptRunner.scriptThread:1616 [wandb_init.py:init():889] starting backend
+2025-12-26 05:17:26,262 INFO    ScriptRunner.scriptThread:1616 [wandb_init.py:init():892] sending inform_init request
+2025-12-26 05:17:26,344 INFO    ScriptRunner.scriptThread:1616 [wandb_init.py:init():900] backend started and connected
+2025-12-26 05:17:26,386 INFO    ScriptRunner.scriptThread:1616 [wandb_init.py:init():970] updated telemetry
+2025-12-26 05:17:26,389 INFO    ScriptRunner.scriptThread:1616 [wandb_init.py:init():994] communicating run to backend with 90.0 second timeout
+2025-12-26 05:17:27,604 INFO    ScriptRunner.scriptThread:1616 [wandb_init.py:init():1041] starting run threads in backend
+2025-12-26 05:17:27,784 INFO    ScriptRunner.scriptThread:1616 [wandb_run.py:_console_start():2521] atexit reg
+2025-12-26 05:17:27,784 INFO    ScriptRunner.scriptThread:1616 [wandb_run.py:_redirect():2369] redirect: wrap_raw
+2025-12-26 05:17:27,785 INFO    ScriptRunner.scriptThread:1616 [wandb_run.py:_redirect():2438] Wrapping output streams.
+2025-12-26 05:17:27,785 INFO    ScriptRunner.scriptThread:1616 [wandb_run.py:_redirect():2461] Redirects installed.
+2025-12-26 05:17:27,794 INFO    ScriptRunner.scriptThread:1616 [wandb_init.py:init():1081] run started, returning control to user process

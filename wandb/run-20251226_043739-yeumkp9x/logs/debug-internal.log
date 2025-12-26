@@ -1,0 +1,11 @@
+{"time":"2025-12-26T04:37:42.4402558+05:30","level":"INFO","msg":"stream: starting","core version":"0.23.1"}
+{"time":"2025-12-26T04:37:43.4028742+05:30","level":"INFO","msg":"stream: created new stream","id":"yeumkp9x"}
+{"time":"2025-12-26T04:37:43.4036193+05:30","level":"INFO","msg":"handler: started","stream_id":"yeumkp9x"}
+{"time":"2025-12-26T04:37:43.4075441+05:30","level":"INFO","msg":"stream: started","id":"yeumkp9x"}
+{"time":"2025-12-26T04:37:43.4075441+05:30","level":"INFO","msg":"writer: started","stream_id":"yeumkp9x"}
+{"time":"2025-12-26T04:37:43.4075441+05:30","level":"INFO","msg":"sender: started","stream_id":"yeumkp9x"}
+{"time":"2025-12-26T06:02:25.3249101+05:30","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/biswassaswati10-indian-institute-of-information-technolo/medibill-ai/yeumkp9x/file_stream\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2025-12-26T06:02:27.4644425+05:30","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/biswassaswati10-indian-institute-of-information-technolo/medibill-ai/yeumkp9x/file_stream\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2025-12-26T09:37:02.2022472+05:30","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/biswassaswati10-indian-institute-of-information-technolo/medibill-ai/yeumkp9x/file_stream\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2025-12-26T09:37:10.3581796+05:30","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/biswassaswati10-indian-institute-of-information-technolo/medibill-ai/yeumkp9x/file_stream\": dial tcp: lookup api.wandb.ai: no such host"}
+{"time":"2025-12-26T09:37:28.7616824+05:30","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/files/biswassaswati10-indian-institute-of-information-technolo/medibill-ai/yeumkp9x/file_stream\": dial tcp: lookup api.wandb.ai: no such host"}

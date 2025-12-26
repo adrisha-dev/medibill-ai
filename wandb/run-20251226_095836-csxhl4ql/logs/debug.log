@@ -1,0 +1,5 @@
+2025-12-26 09:58:36,455 INFO    ScriptRunner.scriptThread:23176 [wandb_init.py:setup_run_log_directory():714] Logging user logs to C:\Users\ADRISHA\Documents\medibill-ai\wandb\run-20251226_095836-csxhl4ql\logs\debug.log
+2025-12-26 09:58:36,456 INFO    ScriptRunner.scriptThread:23176 [wandb_init.py:setup_run_log_directory():715] Logging internal logs to C:\Users\ADRISHA\Documents\medibill-ai\wandb\run-20251226_095836-csxhl4ql\logs\debug-internal.log
+2025-12-26 09:58:36,457 INFO    ScriptRunner.scriptThread:23176 [wandb_init.py:init():841] calling init triggers
+2025-12-26 09:58:36,458 INFO    ScriptRunner.scriptThread:23176 [wandb_init.py:init():846] wandb.init called with sweep_config: {}
+config: {'model': 'gemini', '_wandb': {}}
