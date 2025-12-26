@@ -29,34 +29,26 @@ def extract_json(text):
     except Exception:
         return None
 
-# ---------------------------
-# PAGE CONFIG
-# ---------------------------
+# PAGE CONFIGURATION
 st.set_page_config(
     page_title="MediBill AI",
     page_icon="🏥",
     layout="centered"
 )
 
-# ---------------------------
 # W&B INITIALIZATION
-# ---------------------------
 wandb.init(
     project="medibill-ai",
     name="billing-insurance-monitoring",
     config={"model": "gemini"}
 )
 
-# ---------------------------
 # GEMINI SETUP
-# ---------------------------
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 model = genai.GenerativeModel("models/gemini-2.5-flash")
 
-# ---------------------------
-# DATABASE FUNCTION
-# ---------------------------
+# IMAGE PROMPT GENERATION FUNCTION
 
 def generate_image_prompt(item_name, category):
         prompt = f"""
@@ -80,6 +72,7 @@ def generate_image_prompt(item_name, category):
         response = model.generate_content(prompt)
         return response.text.strip()
 
+# DATABASE FUNCTION
 def get_bill_items():
     conn = sqlite3.connect("medibill.db")
     cursor = conn.cursor()
@@ -92,9 +85,7 @@ def get_bill_items():
         for row in rows
     ]
 
-# ---------------------------
 # HEADER UI
-# ---------------------------
 st.title("🏥 MediBill AI")
 st.caption(
     "Helping patients and families understand hospital bills with clear explanations and insurance awareness."
@@ -102,9 +93,7 @@ st.caption(
 
 st.divider()
 
-# ---------------------------
 # USER OPTIONS
-# ---------------------------
 col1, col2 = st.columns(2)
 
 with col1:
@@ -116,9 +105,8 @@ with col1:
 with col2:
     family_mode = st.checkbox("👨‍👩‍👧 Explain in simple terms for family members")
 
-# ---------------------------
+
 # LEGEND
-# ---------------------------
 st.markdown("---🛡️ Insurance Coverage Guide---")
 legend_col1, legend_col2, legend_col3 = st.columns(3)
 
@@ -133,9 +121,8 @@ with legend_col3:
 
 st.divider()
 
-# ---------------------------
+
 # LOAD BILL ITEMS
-# ---------------------------
 bill_items = get_bill_items()
 total = sum(item["cost"] for item in bill_items)
 
@@ -143,9 +130,7 @@ st.metric("💰 Total Bill So Far (₹)", total)
 
 st.divider()
 
-# ---------------------------
 # BILL ITEMS DISPLAY
-# ---------------------------
 for item in bill_items:
     with st.container():
         st.subheader(item["item_name"])
@@ -153,10 +138,8 @@ for item in bill_items:
         st.write(f"**Cost:** ₹{item['cost']}")
 
         col_a, col_b = st.columns(2)
-
-        # ---------------------------
-        # IMAGE BUTTON (EDUCATIONAL)
-        # ---------------------------
+        
+        # IMAGE PROMPT BUTTON 
         with col_a:
             if st.button("🖼️ Generate image prompt", key=f"img_{item['item_name']}"):
                 with st.spinner("Generating image prompt..."):
@@ -176,9 +159,7 @@ for item in bill_items:
     "Hospitals can use it to create safe visuals for billing clarity."
                     )
 
-        # ---------------------------
         # EXPLAIN BUTTON
-        # ---------------------------
         with col_b:
             explain = st.button(
                 "🧠 Explain & Check Insurance",
@@ -225,9 +206,7 @@ IMPORTANT:
                 st.code(response.text)
                 st.stop()
 
-            # ---------------------------
             # INSURANCE COLOR BADGE
-            # ---------------------------
             status = result["insurance_status"]
 
             if status == "LIKELY_COVERED":
@@ -237,16 +216,12 @@ IMPORTANT:
             else:
                 st.markdown("🔴 **Usually not covered by insurance**")
 
-            # ---------------------------
             # DISPLAY EXPLANATION
-            # ---------------------------
             st.write(result["explanation"])
             st.info(result["insurance_note"])
             st.caption(f"⚠️ {result['disclaimer']}")
 
-            # ---------------------------
             # W&B LOGGING
-            # ---------------------------
             wandb.log({
                 "item": item["item_name"],
                 "category": item["category"],
@@ -258,9 +233,7 @@ IMPORTANT:
 
         st.divider()
 
-# ---------------------------
 # FOOTER
-# ---------------------------
 st.caption(
     "MediBill AI is an educational tool for billing transparency. "
     "It does not replace professional medical or insurance advice."
