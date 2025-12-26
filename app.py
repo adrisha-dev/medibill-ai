@@ -26,7 +26,6 @@ except Exception:
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel("models/gemini-2.0-flash")
 
-
 def extract_json(text):
     try:
         start = text.find("{")
@@ -52,6 +51,183 @@ def safe_gemini(prompt):
         return model.generate_content(prompt).text
     except Exception:
         return None
+
+# CUSTOM CSS FOR BEAUTIFUL STYLING
+st.markdown("""
+<style>
+    /* Import Google Fonts for a clean, professional look */
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+    
+    /* Global body styling */
+    body {
+        font-family: 'Roboto', sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        color: #333;
+        margin: 0;
+        padding: 0;
+    }
+    
+    /* Main container */
+    .main {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin: 20px auto;
+        max-width: 1200px;
+    }
+    
+    /* Title styling */
+    .stTitle {
+        color: #2c3e50;
+        font-weight: 700;
+        text-align: center;
+        font-size: 2.5em;
+        margin-bottom: 10px;
+    }
+    
+    /* Caption styling */
+    .stCaption {
+        color: #7f8c8d;
+        font-style: italic;
+        text-align: center;
+        font-size: 1.1em;
+    }
+    
+    /* Divider styling */
+    hr {
+        border: none;
+        height: 2px;
+        background: linear-gradient(90deg, #3498db, #2ecc71);
+        margin: 20px 0;
+    }
+    
+    /* Selectbox and checkbox styling */
+    .stSelectbox, .stCheckbox {
+        background: #ecf0f1;
+        border-radius: 10px;
+        padding: 10px;
+        border: 1px solid #bdc3c7;
+        margin-bottom: 15px;
+    }
+    
+    /* Metric styling */
+    .stMetric {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        font-size: 1.5em;
+        font-weight: 500;
+    }
+    
+    /* Subheader styling */
+    .stSubheader {
+        color: #34495e;
+        font-weight: 600;
+        border-left: 5px solid #2ecc71;
+        padding-left: 15px;
+        margin-top: 30px;
+    }
+    
+    /* Button styling */
+    .stButton button {
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 12px 25px;
+        font-size: 1em;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .stButton button:hover {
+        background: linear-gradient(135deg, #27ae60, #229954);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Text area styling */
+    .stTextArea textarea {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        padding: 15px;
+        font-family: 'Roboto', sans-serif;
+        font-size: 1em;
+        resize: vertical;
+    }
+    
+    /* Info and warning boxes */
+    .stInfo, .stWarning {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 10px 0;
+        color: #155724;
+    }
+    
+    .stWarning {
+        background: #fff3cd;
+        border-color: #ffeaa7;
+        color: #856404;
+    }
+    
+    /* Markdown styling for insurance status */
+    .stMarkdown p {
+        font-size: 1.1em;
+        line-height: 1.6;
+    }
+    
+    /* Columns styling */
+    .stColumns {
+        gap: 20px;
+    }
+    
+    /* Footer styling */
+    .stCaption:last-of-type {
+        text-align: center;
+        margin-top: 40px;
+        font-size: 0.9em;
+        color: #95a5a6;
+    }
+    
+    /* Custom legend styling */
+    .legend {
+        display: flex;
+        justify-content: space-around;
+        background: #ecf0f1;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 20px 0;
+    }
+    
+    .legend div {
+        text-align: center;
+        font-weight: 500;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .stTitle {
+            font-size: 2em;
+        }
+        .stMetric {
+            font-size: 1.2em;
+        }
+        .legend {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+</style>
+""", unsafe_allow_html=True)
 
 # HEADER 
 st.title("🏥 MediBill AI")
@@ -79,10 +255,14 @@ with col2:
 # INSURANCE LEGEND
 st.markdown("---🛡️ Insurance Coverage Guide ---")
 
-l1, l2, l3 = st.columns(3)
-l1.markdown("🟢 **Likely Covered**  \nUsually included in standard policies")
-l2.markdown("🟡 **Partially Covered**  \nDepends on policy limits or conditions")
-l3.markdown("🔴 **Not Covered**  \nOften excluded from insurance")
+# Custom legend with better styling
+st.markdown("""
+<div class="legend">
+    <div>🟢 <strong>Likely Covered</strong><br>Usually included in standard policies</div>
+    <div>🟡 <strong>Partially Covered</strong><br>Depends on policy limits or conditions</div>
+    <div>🔴 <strong>Not Covered</strong><br>Often excluded from insurance</div>
+</div>
+""", unsafe_allow_html=True)
 
 st.divider()
 
