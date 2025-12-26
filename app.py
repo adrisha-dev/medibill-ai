@@ -1,293 +1,310 @@
-import os
-import json
-import sqlite3
-import re
-import logging
-
 import streamlit as st
 import google.generativeai as genai
+import sqlite3
+import os
+import json
 import wandb
 
-# Setup basic logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-# Config
+# -------------------- PAGE CONFIG --------------------
 st.set_page_config(
     page_title="MediBill AI",
     page_icon="🏥",
     layout="centered"
 )
 
-# Initialize W&B if api key exists, otherwise skip silently
-# TODO: Add better error handling for network timeouts
-if os.getenv("WANDB_API_KEY"):
-    try:
-        wandb.init(project="medibill-ai", name="production_v1", reinit=True)
-    except Exception as e:
-        logger.warning(f"W&B init failed: {e}")
+# -------------------- W&B INIT --------------------
+# Tracking user interactions and insurance classification trends
+try:
+    wandb.init(
+        project="medibill-ai",
+        name="billing-insurance-monitoring",
+        reinit=True
+    )
+except Exception as e:
+    print("W&B init skipped:", e)
 
-# Gemini Setup
-api_key = os.getenv("GEMINI_API_KEY")
-if not api_key:
-    st.error("Missing GEMINI_API_KEY environment variable.")
-    st.stop()
-
-genai.configure(api_key=api_key)
+# -------------------- GEMINI SETUP --------------------
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel("models/gemini-2.0-flash")
 
-def parse_json_response(text):
-    """
-    Attempts to extract JSON from LLM response using regex.
-    Gemini often wraps json in markdown code blocks.
-    """
+
+# Gemini sometimes adds extra text around JSON,
+# so we defensively extract the first valid JSON object.
+def extract_json(text):
     try:
-        # Look for content between braces, ensuring we catch the outer object
-        match = re.search(r'\{.*\}', text, re.DOTALL)
-        if match:
-            return json.loads(match.group(0))
-        return json.loads(text) # Fallback
-    except json.JSONDecodeError:
-        logger.error(f"Failed to parse JSON from: {text[:50]}...")
+        start = text.find("{")
+        end = text.rfind("}") + 1
+        return json.loads(text[start:end])
+    except Exception:
         return None
 
-def get_db_connection():
-    # Using local sqlite for prototype, move to Postgres for prod
-    try:
-        conn = sqlite3.connect("medibill.db")
-        return conn
-    except sqlite3.Error as e:
-        st.error(f"Database connection failed: {e}")
-        return None
 
-def fetch_bill_items():
-    conn = get_db_connection()
-    if not conn:
-        return []
-    
-    try:
-        cur = conn.cursor()
-        cur.execute("SELECT item_name, category, cost FROM bill_items")
-        rows = cur.fetchall()
-        return [{"item": r[0], "category": r[1], "cost": r[2]} for r in rows]
-    except sqlite3.Error as e:
-        logger.error(f"Query error: {e}")
-        return []
-    finally:
-        conn.close()
+# -------------------- DATABASE ACCESS --------------------
+def get_bill_items():
+    conn = sqlite3.connect("medibill.db")
+    cur = conn.cursor()
+    cur.execute("SELECT item_name, category, cost FROM bill_items")
+    rows = cur.fetchall()
+    conn.close()
 
-def query_llm(prompt):
+    return [
+        {"item": r[0], "category": r[1], "cost": r[2]}
+        for r in rows
+    ]
+
+
+# Centralized Gemini wrapper to avoid app crashes on quota / network issues
+def safe_gemini(prompt):
     try:
-        response = model.generate_content(prompt)
-        return response.text
+        return model.generate_content(prompt).text
     except Exception as e:
-        logger.error(f"LLM Query failed: {e}")
+        print("Gemini call failed:", e)
         return None
 
-# --- Custom Styles ---
+
+# -------------------- CUSTOM CSS --------------------
+# Light styling to avoid default Streamlit look while staying readable
 st.markdown("""
 <style>
-    /* Base font settings */
-    html, body, [class*="css"] {
-        font-family: 'Open Sans', sans-serif;
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f5f7fa;
         color: #333;
     }
-    
-    /* Clean card look for mobile readability */
-    .bill-item-card {
-        background-color: white;
-        padding: 1.5rem;
+
+    .main {
+        background: rgba(255, 255, 255, 0.95);
         border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        margin-bottom: 1.5rem;
-        border: 1px solid #f0f0f0;
-    }
-    
-    /* Prominent metrics */
-    div[data-testid="stMetricValue"] {
-        color: #2980b9; 
-        font-size: 2.2rem !important;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        max-width: 1200px;
+        margin: auto;
     }
 
-    /* Legend badges */
-    .badge {
-        padding: 8px 12px;
-        border-radius: 6px;
+    .stTitle {
+        font-weight: bold;
+        color: #2c3e50;
         text-align: center;
-        font-weight: 600;
-        font-size: 0.85rem;
-        margin-bottom: 5px;
+        font-size: 2.3em;
     }
-    .badge-success { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
-    .badge-warning { background-color: #fffde7; color: #f9a825; border: 1px solid #fff9c4; }
-    .badge-danger { background-color: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
-    
-    /* Mobile-friendly buttons */
-    .stButton > button {
-        width: 100%;
-        border-radius: 8px;
-        height: 2.8rem;
+
+    .stCaption {
+        text-align: center;
+        color: #7f8c8d;
+        font-style: italic;
+        font-size: 1.05em;
+    }
+
+    hr {
+        border: none;
+        height: 2px;
+        background: #2ecc71;
+        margin: 20px 0;
+    }
+
+    .stMetric {
+        background: #3498db;
+        color: white;
+        border-radius: 12px;
+        padding: 18px;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .stSubheader {
+        font-weight: bold;
+        color: #34495e;
+        border-left: 5px solid #2ecc71;
+        padding-left: 12px;
+        margin-top: 25px;
+    }
+
+    .stButton button {
+        background: #2ecc71;
+        color: white;
+        border-radius: 20px;
+        font-weight: bold;
+        padding: 10px 22px;
+    }
+
+    .stButton button:hover {
+        background: #27ae60;
+    }
+
+    .legend {
+        display: flex;
+        justify-content: space-around;
+        background: #ecf0f1;
+        border-radius: 10px;
+        padding: 15px;
+        margin: 20px 0;
+    }
+
+    .legend div {
+        text-align: center;
+        font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+        .legend {
+            flex-direction: column;
+            gap: 10px;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
 
-# --- App Layout ---
 
+# -------------------- HEADER --------------------
 st.title("🏥 MediBill AI")
-
-# Info Box
-st.info(
+st.caption(
     "Helping patients and families understand hospital bills with clear explanations, "
     "insurance awareness, and transparent communication."
 )
 
-# Settings Panel
-with st.expander("⚙️ Settings & Preferences", expanded=False):
-    lang_col, fam_col = st.columns(2)
-    with lang_col:
-        language = st.selectbox("🌐 Language", ["English", "Hindi", "Bengali"])
-    with fam_col:
-        # Defaulting to true as per user feedback
-        family_mode = st.checkbox("👨‍👩‍👧 Family-friendly mode", value=True)
+st.divider()
 
-# Insurance Legend
-st.write("##### 🛡️ Insurance Coverage Guide")
-leg_c1, leg_c2, leg_c3 = st.columns(3)
 
-with leg_c1:
-    st.markdown('<div class="badge badge-success">🟢 Likely Covered</div>', unsafe_allow_html=True)
-with leg_c2:
-    st.markdown('<div class="badge badge-warning">🟡 Partial Cover</div>', unsafe_allow_html=True)
-with leg_c3:
-    st.markdown('<div class="badge badge-danger">🔴 Not Covered</div>', unsafe_allow_html=True)
+# -------------------- USER OPTIONS --------------------
+col1, col2 = st.columns(2)
+
+with col1:
+    language = st.selectbox(
+        "🌐 Preferred language for explanations",
+        ["English", "Hindi", "Bengali"]
+    )
+
+with col2:
+    family_mode = st.checkbox(
+        "👨‍👩‍👧 Explain in simple, family-friendly terms"
+    )
+
+
+# -------------------- INSURANCE LEGEND --------------------
+st.markdown("### 🛡️ Insurance Coverage Guide")
+
+st.markdown("""
+<div class="legend">
+    <div>🟢 Likely Covered<br><small>Usually included in standard policies</small></div>
+    <div>🟡 Partially Covered<br><small>Depends on policy limits</small></div>
+    <div>🔴 Not Covered<br><small>Often excluded</small></div>
+</div>
+""", unsafe_allow_html=True)
 
 st.divider()
 
-# Main Content
-items = fetch_bill_items()
 
-if not items:
-    st.warning("No bill items found in the database.")
-else:
-    # Total Cost Metric
-    total = sum(i["cost"] for i in items)
-    
-    # Using columns to center the metric on wider screens, usually looks better on mobile too
-    _, mid_col, _ = st.columns([1, 2, 1])
-    with mid_col:
-        st.metric("💰 Total Bill", f"₹{total:,}")
+# -------------------- BILL DATA --------------------
+items = get_bill_items()
+total_cost = sum(i["cost"] for i in items)
+st.metric("💰 Total Hospital Bill So Far (₹)", total_cost)
 
-    st.write("") # Spacer
+st.divider()
 
-    # Render Bill Items
-    for i in items:
-        item_name = i["item"]
-        
-        # Session state keys
-        exp_key = f"explain_{item_name}"
-        img_key = f"image_{item_name}"
 
-        # Card container
-        with st.container():
-            st.markdown(f"""
-            <div class="bill-item-card">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <h3 style="margin:0; font-size:1.1rem; font-weight:700;">{item_name}</h3>
-                    <span style="background:#e3f2fd; color:#1565c0; padding:4px 8px; border-radius:8px; font-weight:bold;">₹{i['cost']}</span>
-                </div>
-                <p style="color:#666; font-size:0.9rem; margin-top:5px;">📂 {i['category']}</p>
-            </div>
-            """, unsafe_allow_html=True)
+# -------------------- MAIN RENDER LOOP --------------------
+# Each item gets visual context + insurance explanation
+for i in items:
+    item = i["item"]
+    key_explain = f"explain_{item}"
+    key_image = f"image_{item}"
 
-            viz_col, info_col = st.columns(2)
+    st.subheader(item)
+    st.write(f"**Category:** {i['category']}")
+    st.write(f"**Cost:** ₹{i['cost']}")
 
-            # Button 1: Visual Context
-            with viz_col:
-                if st.button("🖼️ Visual Ref", key=f"btn_img_{item_name}"):
-                    if img_key not in st.session_state:
-                        with st.spinner("Generating visual description..."):
-                            prompt = f"""
-                            Educational illustration description.
-                            Item: {item_name}
-                            Category: {i['category']}
-                            Flat medical illustration, clean environment, no patients, no blood.
-                            """
-                            resp = query_llm(prompt)
-                            st.session_state[img_key] = resp if resp else "Service unavailable"
+    colA, colB = st.columns(2)
 
-            # Button 2: Explanation
-            with info_col:
-                if st.button("🧠 Coverage Info", key=f"btn_exp_{item_name}"):
-                    if exp_key not in st.session_state:
-                        with st.spinner("Analyzing policy..."):
-                            lang_instruction = f"Language: {language}."
-                            if language == "Hindi": lang_instruction += " (Devanagari script)."
-                            if language == "Bengali": lang_instruction += " (Bengali script)."
+    # ---- Visual context button ----
+    if colA.button("🖼️ What does this look like?", key=f"img_{item}"):
+        if key_image not in st.session_state:
+            img_prompt = f"""
+Educational illustration description.
+Item: {item}
+Category: {i['category']}
+Flat medical illustration, clean environment.
+No patients, no blood, no surgical visuals.
+"""
+            st.session_state[key_image] = safe_gemini(img_prompt) or "FAILED"
 
-                            prompt = f"""
-                            You are MediBill AI. {lang_instruction}
-                            Explain this hospital bill item in simple terms and classify insurance coverage.
-                            Item: {item_name}
-                            Category: {i['category']}
-                            Cost: ₹{i['cost']}
+    if key_image in st.session_state:
+        if st.session_state[key_image] == "FAILED":
+            st.info("🖼️ Visual explanation is temporarily unavailable.")
+        else:
+            st.text_area(
+                "AI-generated visual description:",
+                st.session_state[key_image],
+                height=150
+            )
+            st.caption("For educational understanding only.")
 
-                            Return strict JSON:
-                            {{
-                                "explanation": "...",
-                                "insurance_status": "LIKELY_COVERED|PARTIALLY_COVERED|NOT_COVERED",
-                                "insurance_note": "...",
-                                "disclaimer": "..."
-                            }}
-                            """
-                            raw_text = query_llm(prompt)
-                            parsed = parse_json_response(raw_text)
-                            st.session_state[exp_key] = parsed if parsed else "FAILED"
+    # ---- Explanation button ----
+    if colB.button("🧠 Why was this charged?", key=f"exp_{item}"):
+        if key_explain not in st.session_state:
 
-            # Results Display
-            
-            # 1. Image Result
-            if img_key in st.session_state:
-                val = st.session_state[img_key]
-                if val == "FAILED":
-                    st.error("Could not generate visual description.")
-                else:
-                    st.markdown("**Visual Reference:**")
-                    st.info(val)
-                    st.caption("Educational use only.")
+            lang_rule = (
+                "Language: English."
+                if language == "English"
+                else "Language: Hindi (Devanagari only)."
+                if language == "Hindi"
+                else "Language: Bengali (বাংলা only)."
+            )
 
-            # 2. Explanation Result
-            if exp_key in st.session_state:
-                data = st.session_state[exp_key]
-                
-                if data == "FAILED":
-                    st.error("Could not analyze item. Please try again.")
-                else:
-                    # Status Badge
-                    status = data.get("insurance_status", "UNKNOWN")
-                    if status == "LIKELY_COVERED":
-                        st.success("✅ Likely Covered")
-                    elif status == "PARTIALLY_COVERED":
-                        st.warning("⚠️ Partially Covered")
-                    else:
-                        st.error("🛑 Not Usually Covered")
+            explain_prompt = f"""
+You are MediBill AI.
+{lang_rule}
 
-                    st.markdown(f"**Explanation:** {data.get('explanation')}")
-                    st.caption(f"**Note:** {data.get('insurance_note')}")
-                    
-                    # Log to W&B
-                    if wandb.run is not None:
-                        wandb.log({
-                            "item": item_name,
-                            "status": status,
-                            "lang": language
-                        })
+Explain this hospital bill item in simple terms and classify insurance coverage.
 
-            st.write("---")
+Item: {item}
+Category: {i['category']}
+Cost: ₹{i['cost']}
 
-# Footer
-st.markdown(
-    "<div style='text-align: center; color: #888; font-size: 0.8rem;'>"
-    "MediBill AI | Educational Tool Only | Not Medical/Financial Advice"
-    "</div>", 
-    unsafe_allow_html=True
+Return a valid JSON object with:
+- explanation
+- insurance_status (LIKELY_COVERED / PARTIALLY_COVERED / NOT_COVERED)
+- insurance_note
+- disclaimer
+"""
+
+            ai_response = safe_gemini(explain_prompt)
+            st.session_state[key_explain] = extract_json(ai_response) if ai_response else "FAILED"
+
+    # ---- Display explanation ----
+    if key_explain in st.session_state:
+        result = st.session_state[key_explain]
+
+        if result == "FAILED":
+            st.warning("⚠️ Explanation is temporarily unavailable.")
+        else:
+            status = result["insurance_status"]
+
+            if status == "LIKELY_COVERED":
+                st.markdown("🟢 **Likely covered by insurance**")
+            elif status == "PARTIALLY_COVERED":
+                st.markdown("🟡 **May be partially covered**")
+            else:
+                st.markdown("🔴 **Usually not covered**")
+
+            st.write(result["explanation"])
+            st.info(result["insurance_note"])
+            st.caption("This explanation is for billing clarity only.")
+
+            try:
+                wandb.log({
+                    "item": item,
+                    "insurance_status": status,
+                    "language": language,
+                    "family_mode": family_mode
+                })
+            except Exception as e:
+                print("W&B log failed:", e)
+
+    st.divider()
+
+
+# -------------------- FOOTER --------------------
+st.caption(
+    "MediBill AI is an educational tool designed to improve transparency in hospital billing. "
+    "It does not replace professional medical or insurance advice."
 )
