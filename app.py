@@ -12,7 +12,6 @@ st.set_page_config(
     layout="centered"
 )
 
-# CUSTOM CSS FOR BEAUTIFUL STYLING (Streamlit-Compatible)
 st.markdown("""
 <style>
     /* Full-page background (simplified for compatibility) */
@@ -188,7 +187,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# W&B INIT
+# Logging interactions to understand how billing items are interpreted
 try:
     wandb.init(
         project="medibill-ai",
@@ -196,6 +195,7 @@ try:
         reinit=True
     )
 except Exception:
+    # App should continue even if analytics fail
     pass
 
 # GEMINI SETUP
@@ -204,6 +204,11 @@ model = genai.GenerativeModel("models/gemini-2.0-flash")
 
 
 def extract_json(text):
+    """
+    Extracts a valid JSON object from the model response.
+    This keeps the app stable even if extra text slips in.
+    """
+
     try:
         start = text.find("{")
         end = text.rfind("}") + 1
@@ -211,8 +216,8 @@ def extract_json(text):
     except Exception:
         return None
 
-# DATABASE
-def get_bill_items():
+# DATABASE CONNECTION
+def get_bill():
     conn = sqlite3.connect("medibill.db")
     cur = conn.cursor()
     cur.execute("SELECT item_name, category, cost FROM bill_items")
@@ -223,7 +228,11 @@ def get_bill_items():
         for r in rows
     ]
 
-def safe_gemini(prompt):
+def safely_call_gemini(prompt):
+     """
+    Small wrapper around the AI call to avoid breaking
+    the app if the API times out or errors.
+    """
     try:
         return model.generate_content(prompt).text
     except Exception:
@@ -263,12 +272,12 @@ l3.markdown("🔴 **Not Covered**  \nOften excluded from insurance")
 st.divider()
 
 # BILL DATA
-items = get_bill_items()
+items = get_bill()
 st.metric("💰 Total Hospital Bill So Far (₹)", sum(i["cost"] for i in items))
 
 st.divider()
 
-# MAIN LOOP
+#Details of all items on the list
 for i in items:
     item = i["item"]
     key_explain = f"explain_{item}"
@@ -287,12 +296,13 @@ for i in items:
 Educational illustration description.
 Item: {item}
 Category: {i['category']}
-Flat medical illustration, clean environment, no patients, no blood.
+Describe a clean, educational medical illustration.
 """
-            st.session_state[key_image] = safe_gemini(img_prompt) or "FAILED"
+            st.session_state[key_image] = safely_call_gemini(img_prompt) or "FAILED"
 
     if key_image in st.session_state:
         if st.session_state[key_image] == "FAILED":
+            #if API hits daily limit for calls
             st.info(
                 "🖼️ Visual explanation is temporarily unavailable due to AI usage limits."
             )
@@ -317,7 +327,7 @@ Flat medical illustration, clean environment, no patients, no blood.
                 if language == "Hindi"
                 else "Language: Bengali (বাংলা only)."
             )
-
+            #JSON only enforced to ensure output in proper format
             explain_prompt = f"""
 You are MediBill AI.
 {lang_rule}
@@ -336,14 +346,14 @@ JSON only:
  "disclaimer": "..."
 }}
 """
-            raw = safe_gemini(explain_prompt)
+            raw = safely_call_gemini(explain_prompt)
             st.session_state[key_explain] = extract_json(raw) if raw else "FAILED"
 
-    # DISPLAY EXPLANATION
     if key_explain in st.session_state:
         result = st.session_state[key_explain]
 
         if result == "FAILED":
+            #when API hits daily free trial limit
             st.warning(
                 "⚠️ AI explanation is temporarily unavailable due to usage limits."
             )
