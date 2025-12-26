@@ -206,4 +206,3 @@ st.caption(
     "All information provided is for awareness and discussion purposes only."
 )
 
-hey can you give me a css block in this code to build a beautiful looking website for this webapp?
