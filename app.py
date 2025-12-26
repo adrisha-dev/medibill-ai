@@ -38,8 +38,8 @@ model = genai.GenerativeModel("models/gemini-2.0-flash")
 
 def parse_json_response(text):
     """
-    Attempts to extract JSON from LLM response using regex.
-    Gemini often wraps json in markdown code blocks.
+    Gemini sometimes wraps JSON in markdown.  
+    This tries to pull out the actual object safely.
     """
     try:
         # Look for content between braces, ensuring we catch the outer object
@@ -51,8 +51,8 @@ def parse_json_response(text):
         logger.error(f"Failed to parse JSON from: {text[:50]}...")
         return None
 
-def get_db_connection():
-    # Using local sqlite for prototype, move to Postgres for prod
+def connect_db():
+    # Using local sqlite for prototype
     try:
         conn = sqlite3.connect("medibill.db")
         return conn
@@ -60,8 +60,8 @@ def get_db_connection():
         st.error(f"Database connection failed: {e}")
         return None
 
-def fetch_bill_items():
-    conn = get_db_connection()
+def fetch_bill():
+    conn = connect_db()
     if not conn:
         return []
     
@@ -84,7 +84,6 @@ def query_llm(prompt):
         logger.error(f"LLM Query failed: {e}")
         return None
 
-# CUSTOM CSS FOR BEAUTIFUL STYLING (Streamlit-Compatible)
 st.markdown("""
 <style>
     /* Full-page background (simplified for compatibility) */
@@ -259,17 +258,13 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
 # --- App Layout ---
-
 st.title("🏥 MediBill AI")
-
-# Info Box
 st.info(
     "Helping patients and families understand hospital bills with clear explanations, "
     "insurance awareness, and transparent communication."
 )
-
-# Settings Panel
 with st.expander("⚙️ Settings & Preferences", expanded=False):
     lang_col, fam_col = st.columns(2)
     with lang_col:
@@ -279,7 +274,7 @@ with st.expander("⚙️ Settings & Preferences", expanded=False):
         family_mode = st.checkbox("👨‍👩‍👧 Family-friendly mode", value=True)
 
 # Insurance Legend
-st.write("##### 🛡️ Insurance Coverage Guide")
+st.write("--- 🛡️ Insurance Coverage Guide ---")
 leg_c1, leg_c2, leg_c3 = st.columns(3)
 
 with leg_c1:
@@ -292,12 +287,11 @@ with leg_c3:
 st.divider()
 
 # Main Content
-items = fetch_bill_items()
+items = fetch_bill()
 
 if not items:
     st.warning("No bill items found in the database.")
 else:
-    # Total Cost Metric
     total = sum(i["cost"] for i in items)
     
     # Using columns to center the metric on wider screens, usually looks better on mobile too
@@ -310,8 +304,6 @@ else:
     # Render Bill Items
     for i in items:
         item_name = i["item"]
-        
-        # Session state keys
         exp_key = f"explain_{item_name}"
         img_key = f"image_{item_name}"
 
