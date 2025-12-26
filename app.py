@@ -38,7 +38,7 @@ wandb.init(
 
 # GEMINI SETUP
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel("models/gemini-2.5-flash")
+model = genai.GenerativeModel("models/gemini-2.0-flash")
 
 # IMAGE PROMPT GENERATION
 def generate_image_prompt(item_name, category):
