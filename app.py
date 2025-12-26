@@ -4,74 +4,90 @@ import sqlite3
 import os
 import json
 import wandb
-import time
 
-# --- 1. PAGE CONFIGURATION (Must be first) ---
+# --- 1. PAGE CONFIGURATION (Mobile Optimized) ---
 st.set_page_config(
     page_title="MediBill AI",
     page_icon="🏥",
-    layout="wide",  # WIDE layout is key for the new look
-    initial_sidebar_state="expanded"
+    layout="centered" # Centered is better for mobile reading
 )
 
-# --- 2. CUSTOM CSS (The "Beautiful" Part) ---
+# --- 2. CUSTOM CSS (Fonts, Colors, Mobile Styles) ---
 st.markdown("""
 <style>
-    /* Light grey background for the whole app */
-    .stApp {
-        background-color: #f0f2f6;
+    /* IMPORT FONTS */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap');
+
+    /* GLOBAL STYLES */
+    html, body, [class*="css"] {
+        font-family: 'Open Sans', sans-serif;
+        background-color: #f8f9fa; /* Light grey background */
+        color: #333333;
     }
-    
-    /* White Card Styling for Bill Items */
-    .bill-card {
-        background-color: #ffffff;
-        padding: 25px;
+
+    /* HEADERS */
+    h1, h2, h3 {
+        font-family: 'Poppins', sans-serif;
+        color: #2c3e50;
+        font-weight: 700;
+    }
+
+    /* CARD STYLE (The container for bill items) */
+    .stContainer {
+        background-color: white;
+        padding: 1rem;
         border-radius: 15px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        border: 1px solid #e0e0e0;
-        margin-bottom: 20px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+        border: 1px solid #eee;
     }
-    
-    /* Metrics Styling */
+
+    /* BUTTONS (Full width for mobile touch targets) */
+    .stButton > button {
+        width: 100%;
+        border-radius: 10px;
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+    }
+
+    /* METRIC HIGHLIGHT */
     div[data-testid="stMetricValue"] {
-        font-size: 28px;
-        color: #2563eb;
+        color: #2980b9;
+        font-family: 'Poppins', sans-serif;
+        font-size: 2rem !important;
     }
-    
-    /* Custom Badges */
-    .badge-green { background-color: #d1fae5; color: #065f46; padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85em; }
-    .badge-yellow { background-color: #fef3c7; color: #92400e; padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85em; }
-    .badge-red { background-color: #fee2e2; color: #991b1b; padding: 5px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85em; }
+
+    /* LEGEND BOXES */
+    .legend-box {
+        padding: 10px;
+        border-radius: 8px;
+        text-align: center;
+        margin-bottom: 5px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .l-green { background-color: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+    .l-yellow { background-color: #fffde7; color: #f9a825; border: 1px solid #fff9c4; }
+    .l-red { background-color: #ffebee; color: #c62828; border: 1px solid #ffcdd2; }
+
 </style>
 """, unsafe_allow_html=True)
 
-# --- 3. DATABASE MOCK (So it works instantly for you) ---
-def get_bill_items():
-    # If you have a real DB, uncomment the sqlite3 code below.
-    # For now, I am returning dummy data so you can SEE the UI immediately.
-    return [
-        {"item": "MRI - Brain Scan (Contrast)", "category": "Diagnostics", "cost": 14500},
-        {"item": "Consultation - Dr. Sharma", "category": "Professional Fees", "cost": 2000},
-        {"item": "IV Cannula & Fluids", "category": "Consumables", "cost": 850},
-        {"item": "ICU Room Charges (Day 1)", "category": "Room & Board", "cost": 12000}
-    ]
-
-# --- 4. AI & LOGGING SETUP ---
+# --- 3. INITIALIZATION (W&B, Gemini) ---
 try:
-    if os.getenv("GEMINI_API_KEY"):
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-        model = genai.GenerativeModel("models/gemini-2.0-flash")
-    else:
-        model = None
-except Exception:
-    model = None
-
-try:
-    wandb.init(project="medibill-ai", name="ui-update", reinit=True)
+    wandb.init(
+        project="medibill-ai",
+        name="billing-insurance-monitoring",
+        reinit=True
+    )
 except Exception:
     pass
 
-# --- 5. HELPER FUNCTIONS ---
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+model = genai.GenerativeModel("models/gemini-2.0-flash")
+
+# --- 4. FUNCTIONS (Database & Parsing) ---
 def extract_json(text):
     try:
         start = text.find("{")
@@ -80,114 +96,194 @@ def extract_json(text):
     except Exception:
         return None
 
+# RESTORED: ACTUAL DATABASE CONNECTION
+def get_bill_items():
+    try:
+        conn = sqlite3.connect("medibill.db")
+        cur = conn.cursor()
+        cur.execute("SELECT item_name, category, cost FROM bill_items")
+        rows = cur.fetchall()
+        conn.close()
+        return [
+            {"item": r[0], "category": r[1], "cost": r[2]}
+            for r in rows
+        ]
+    except Exception:
+        # Fallback only if DB file is missing, to prevent crash
+        return []
+
 def safe_gemini(prompt):
-    # If no key, simulate a delay and return dummy text so UI doesn't break
-    if not model:
-        time.sleep(1.5) 
-        return None 
     try:
         return model.generate_content(prompt).text
     except Exception:
         return None
 
-# --- 6. SIDEBAR UI ---
-with st.sidebar:
-    st.title("⚙️ Settings")
-    st.markdown("Customize your billing assistant.")
-    
-    language = st.selectbox("Language", ["English", "Hindi", "Bengali"])
-    family_mode = st.toggle("Family Friendly Mode", value=True)
-    
-    st.divider()
-    
-    # Legend in Sidebar
-    st.subheader("Insurance Legend")
-    st.markdown('<span class="badge-green">Likely Covered</span>', unsafe_allow_html=True)
-    st.caption("Standard policy inclusion")
-    st.markdown('<span class="badge-yellow">Partially Covered</span>', unsafe_allow_html=True)
-    st.caption("Limits apply")
-    st.markdown('<span class="badge-red">Not Covered</span>', unsafe_allow_html=True)
-    st.caption("Usually excluded")
+# --- 5. APP UI LAYOUT ---
 
-# --- 7. MAIN DASHBOARD ---
-
+# HEADER
 st.title("🏥 MediBill AI")
-st.markdown("### Patient Financial Dashboard")
+st.markdown("""
+<div style='background-color: #e3f2fd; padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 5px solid #2196f3;'>
+    <small style='color: #0d47a1;'>
+    Helping patients and families understand hospital bills with clear explanations, 
+    insurance awareness, and transparent communication.
+    </small>
+</div>
+""", unsafe_allow_html=True)
 
-# Top Metrics
-items = get_bill_items()
-total = sum(i['cost'] for i in items)
+# USER OPTIONS (Styled for Mobile)
+with st.expander("⚙️ Settings & Preferences", expanded=False):
+    language = st.selectbox(
+        "🌐 Preferred language for explanations",
+        ["English", "Hindi", "Bengali"]
+    )
+    family_mode = st.checkbox(
+        "👨‍👩‍👧 Explain in simple, family-friendly terms",
+        value=True
+    )
 
-m1, m2, m3 = st.columns(3)
-m1.metric("Total Bill Amount", f"₹ {total:,}")
-m2.metric("Items to Review", len(items))
-m3.metric("Policy Status", "Active", delta="Verified")
+# INSURANCE LEGEND (Colorful & Compact)
+st.markdown("##### 🛡️ Insurance Coverage Guide")
+l1, l2, l3 = st.columns(3)
+with l1:
+    st.markdown('<div class="legend-box l-green">🟢 Likely Covered<br><span style="font-weight:400; font-size:0.7rem">Usually included</span></div>', unsafe_allow_html=True)
+with l2:
+    st.markdown('<div class="legend-box l-yellow">🟡 Partial<br><span style="font-weight:400; font-size:0.7rem">Check limits</span></div>', unsafe_allow_html=True)
+with l3:
+    st.markdown('<div class="legend-box l-red">🔴 Not Covered<br><span style="font-weight:400; font-size:0.7rem">Often excluded</span></div>', unsafe_allow_html=True)
 
 st.divider()
 
-# --- 8. BILL ITEM CARDS ---
+# BILL DATA & TOTAL
+items = get_bill_items()
 
-for i in items:
-    item = i["item"]
-    cost = i["cost"]
-    cat = i["category"]
+if not items:
+    st.warning("No bill items found in database (medibill.db).")
+else:
+    # Centered Metric for Mobile
+    col_mid = st.columns([1,2,1])
+    with col_mid[1]:
+         st.metric("💰 Total Bill (₹)", sum(i["cost"] for i in items))
     
-    # Keys for state
-    key_exp = f"exp_{item}"
-    
-    # CARD HTML
-    st.markdown(f"""
-    <div class="bill-card">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="margin:0; color:#1e293b;">{item}</h3>
-            <h3 style="margin:0; color:#2563eb;">₹{cost:,}</h3>
-        </div>
-        <p style="color:#64748b; margin-top:5px; font-size:0.9rem;">📂 {cat}</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.write("") # Spacer
 
-    # ACTION BUTTONS (Below the card)
-    c1, c2 = st.columns([1, 4])
-    
-    with c1:
-        if st.button(f"🧠 Analyze", key=f"btn_{item}", use_container_width=True, type="primary"):
-            if key_exp not in st.session_state:
-                with st.status("🤖 AI is reading insurance policies...", expanded=True) as status:
-                    prompt = f"""
-                    Role: MediBill AI. Lang: {language}.
-                    Explain item: {item} ({cat}) - Cost: {cost}.
-                    JSON: {{ "explanation": "...", "insurance_status": "LIKELY_COVERED|PARTIALLY_COVERED|NOT_COVERED", "insurance_note": "..." }}
-                    """
-                    raw = safe_gemini(prompt)
-                    # Fallback if no API key
-                    fallback = {
-                        "explanation": "This is a simulated explanation because the API Key is missing or failed.",
-                        "insurance_status": "LIKELY_COVERED", 
-                        "insurance_note": "Check your specific policy limits."
-                    }
-                    st.session_state[key_exp] = extract_json(raw) if raw else fallback
-                    status.update(label="Analysis Complete", state="complete", expanded=False)
+    # MAIN LOOP - CARD UI
+    for i in items:
+        item = i["item"]
+        key_explain = f"explain_{item}"
+        key_image = f"image_{item}"
 
-    # RESULTS DISPLAY
-    if key_exp in st.session_state:
-        data = st.session_state[key_exp]
-        if data:
-            with st.expander("See AI Analysis", expanded=True):
-                # Badge Logic
-                status_code = data.get("insurance_status", "")
-                if status_code == "LIKELY_COVERED":
-                    st.markdown('<span class="badge-green">✅ Likely Covered</span>', unsafe_allow_html=True)
-                elif status_code == "PARTIALLY_COVERED":
-                    st.markdown('<span class="badge-yellow">⚠️ Partially Covered</span>', unsafe_allow_html=True)
+        # CONTAINER STARTS (The White Card)
+        with st.container():
+            # Item Header
+            st.markdown(f"""
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="margin: 0; font-size: 1.2rem;">{item}</h3>
+                <span style="background-color: #e3f2fd; color: #1565c0; padding: 4px 8px; border-radius: 12px; font-weight: bold; font-size: 0.9rem;">₹{i['cost']}</span>
+            </div>
+            <p style="color: #666; font-size: 0.9rem; margin-top: -5px; font-style: italic;">📂 {i['category']}</p>
+            <hr style="margin: 10px 0; border: 0; border-top: 1px solid #eee;">
+            """, unsafe_allow_html=True)
+
+            # Buttons in Columns (Mobile Friendly)
+            colA, colB = st.columns(2)
+
+            # --- IMAGE SECTION ---
+            with colA:
+                if st.button("🖼️ Learn what this looks like", key=f"img_{item}"):
+                    if key_image not in st.session_state:
+                        with st.spinner("Sketching..."):
+                            img_prompt = f"""
+                            Educational illustration description.
+                            Item: {item}
+                            Category: {i['category']}
+                            Flat medical illustration, clean environment, no patients, no blood.
+                            """
+                            st.session_state[key_image] = safe_gemini(img_prompt) or "FAILED"
+
+            # --- EXPLAIN SECTION ---
+            with colB:
+                if st.button("🧠 Understand coverage", key=f"exp_{item}"):
+                    if key_explain not in st.session_state:
+                        with st.spinner("Analyzing..."):
+                            lang_rule = (
+                                "Language: English." if language == "English"
+                                else "Language: Hindi (Devanagari only)." if language == "Hindi"
+                                else "Language: Bengali (বাংলা only)."
+                            )
+
+                            explain_prompt = f"""
+                            You are MediBill AI.
+                            {lang_rule}
+
+                            Explain this hospital bill item in simple terms and classify insurance coverage.
+
+                            Item: {item}
+                            Category: {i['category']}
+                            Cost: ₹{i['cost']}
+
+                            JSON only:
+                            {{
+                            "explanation": "...",
+                            "insurance_status": "LIKELY_COVERED|PARTIALLY_COVERED|NOT_COVERED",
+                            "insurance_note": "...",
+                            "disclaimer": "..."
+                            }}
+                            """
+                            raw = safe_gemini(explain_prompt)
+                            st.session_state[key_explain] = extract_json(raw) if raw else "FAILED"
+
+            # --- DYNAMIC RESULTS DISPLAY (Inside the Card) ---
+            
+            # 1. Image Result
+            if key_image in st.session_state:
+                st.markdown("---")
+                if st.session_state[key_image] == "FAILED":
+                    st.info("🖼️ Visual explanation is temporarily unavailable due to AI usage limits.")
                 else:
-                    st.markdown('<span class="badge-red">🔴 Not Covered</span>', unsafe_allow_html=True)
-                
-                st.write("") # Spacer
-                st.write(f"**Explanation:** {data.get('explanation')}")
-                st.info(f"**Note:** {data.get('insurance_note')}")
-    
-    st.markdown("<br>", unsafe_allow_html=True)
+                    st.markdown("**🎨 Visual Reference:**")
+                    st.info(st.session_state[key_image])
+                    st.caption("These visuals are meant only for educational understanding, not for diagnosis or treatment.")
 
-# Footer
-st.markdown("---")
-st.caption("MediBill AI Demo | Designed for Educational Purposes Only")
+            # 2. Explanation Result
+            if key_explain in st.session_state:
+                st.markdown("---")
+                result = st.session_state[key_explain]
+
+                if result == "FAILED":
+                    st.warning("⚠️ AI explanation is temporarily unavailable due to usage limits.")
+                else:
+                    status = result["insurance_status"]
+                    
+                    # Styled Status Box
+                    if status == "LIKELY_COVERED":
+                        st.markdown('<div style="background:#e8f5e9; color:#2e7d32; padding:10px; border-radius:8px; margin-bottom:10px;">🟢 <b>Likely Covered</b></div>', unsafe_allow_html=True)
+                    elif status == "PARTIALLY_COVERED":
+                        st.markdown('<div style="background:#fffde7; color:#f9a825; padding:10px; border-radius:8px; margin-bottom:10px;">🟡 <b>Partially Covered</b></div>', unsafe_allow_html=True)
+                    else:
+                        st.markdown('<div style="background:#ffebee; color:#c62828; padding:10px; border-radius:8px; margin-bottom:10px;">🔴 <b>Not Covered</b></div>', unsafe_allow_html=True)
+
+                    st.markdown(f"**Explanation:** {result['explanation']}")
+                    st.caption(f"📝 **Note:** {result['insurance_note']}")
+                    
+                    st.caption("⚠️ This explanation is for billing clarity only and does not replace professional medical or insurance advice.")
+
+                    try:
+                        wandb.log({
+                            "item": item,
+                            "insurance_status": status,
+                            "language": language,
+                            "family_mode": family_mode
+                        })
+                    except Exception:
+                        pass
+        
+        # End of Card (Space between items)
+        st.write("") 
+
+# FOOTER 
+st.divider()
+st.caption(
+    "MediBill AI is an educational tool designed to improve transparency in hospital billing. "
+    "All information provided is for awareness and discussion purposes only."
+)
