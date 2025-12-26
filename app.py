@@ -99,7 +99,7 @@ for item in bill_items:
 
     colA, colB = st.columns(2)
     with colA:
-        if st.button("🖼️ Illustration info", key=f"img_{item_id}"):
+        if st.button("🖼️ Image generation prompt", key=f"img_{item_id}"):
             st.text_area(
                 "Illustration description",
                 generate_image_prompt(item_id, item["category"]),
