@@ -5,33 +5,25 @@ import os
 import json
 import wandb
 
-# =====================================================
 # PAGE CONFIG
-# =====================================================
 st.set_page_config(
     page_title="MediBill AI",
     page_icon="🏥",
     layout="centered"
 )
 
-# =====================================================
-# W&B INIT (safe even if AI fails)
-# =====================================================
+# W&B INIT
 wandb.init(
     project="medibill-ai",
     name="billing-insurance-monitoring",
     reinit=True
 )
 
-# =====================================================
 # GEMINI SETUP
-# =====================================================
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel("models/gemini-2.0-flash")
 
-# =====================================================
 # SAFE JSON EXTRACTOR
-# =====================================================
 def extract_json(text):
     try:
         text = text.strip()
@@ -45,16 +37,12 @@ def extract_json(text):
     except Exception:
         return None
 
-# =====================================================
 # HARD-CACHED GEMINI CALL (KEY FIX)
-# =====================================================
 @st.cache_data(show_spinner=False)
 def call_gemini(prompt: str) -> str:
     return model.generate_content(prompt).text
 
-# =====================================================
-# IMAGE PROMPT (CACHED)
-# =====================================================
+# IMAGE PROMPT 
 @st.cache_data(show_spinner=False)
 def generate_image_prompt(item, category):
     prompt = f"""
@@ -65,9 +53,7 @@ Rules: flat style, clean medical setting, no patients, no blood, no diagnosis.
 """
     return call_gemini(prompt)
 
-# =====================================================
 # DATABASE
-# =====================================================
 def get_bill_items():
     conn = sqlite3.connect("medibill.db")
     cur = conn.cursor()
@@ -76,16 +62,12 @@ def get_bill_items():
     conn.close()
     return [{"item_name": r[0], "category": r[1], "cost": r[2]} for r in rows]
 
-# =====================================================
 # HEADER
-# =====================================================
 st.title("🏥 MediBill AI")
 st.caption("Clear explanations and insurance awareness for hospital bills.")
 st.divider()
 
-# =====================================================
 # USER OPTIONS
-# =====================================================
 c1, c2 = st.columns(2)
 
 with c1:
@@ -94,26 +76,20 @@ with c1:
 with c2:
     family_mode = st.checkbox("👨‍👩‍👧 Simple explanation")
 
-# =====================================================
 # INSURANCE LEGEND
-# =====================================================
-st.markdown("### 🛡️ Insurance Guide")
+st.markdown("---🛡️ Insurance Guide---")
 l1, l2, l3 = st.columns(3)
 l1.markdown("🟢 Often covered")
 l2.markdown("🟡 Policy dependent")
 l3.markdown("🔴 Often not covered")
 st.divider()
 
-# =====================================================
 # BILL DATA
-# =====================================================
 bill_items = get_bill_items()
 st.metric("💰 Total Bill (₹)", sum(i["cost"] for i in bill_items))
 st.divider()
 
-# =====================================================
-# MAIN LOOP (CLICK-SAFE)
-# =====================================================
+# MAIN LOOP
 for item in bill_items:
     item_id = item["item_name"]
 
@@ -122,8 +98,6 @@ for item in bill_items:
     st.write(f"Cost: ₹{item['cost']}")
 
     colA, colB = st.columns(2)
-
-    # ---------- IMAGE PROMPT ----------
     with colA:
         if st.button("🖼️ Illustration info", key=f"img_{item_id}"):
             st.text_area(
@@ -133,15 +107,11 @@ for item in bill_items:
             )
             st.caption("Educational visual reference only.")
 
-    # ---------- EXPLAIN BUTTON (LOCKED) ----------
+    #EXPLAIN BUTTON
     with colB:
         if st.button("🧠 Explain", key=f"btn_{item_id}"):
             st.session_state[f"show_{item_id}"] = True
-
-    # ---------- EXPLANATION (ONLY ONCE) ----------
     if st.session_state.get(f"show_{item_id}"):
-
-        # Short language rule
         lang_rule = ""
         if language == "English":
             lang_rule = "Language: English."
@@ -174,7 +144,7 @@ JSON only:
         except Exception:
             st.warning(
                 "⚠️ AI usage limit reached.\n"
-                "Showing cached/demo-safe behavior."
+                "Showing demo-safe behavior."
             )
             st.stop()
 
@@ -205,9 +175,7 @@ JSON only:
 
     st.divider()
 
-# =====================================================
 # FOOTER
-# =====================================================
 st.caption(
     "MediBill AI demonstrates responsible GenAI usage for healthcare billing transparency."
 )
