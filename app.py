@@ -53,9 +53,7 @@ def safe_gemini(prompt):
     except Exception:
         return None
 
-# =====================================================
-# HEADER (RESTORED UI)
-# =====================================================
+# HEADER 
 st.title("🏥 MediBill AI")
 st.caption(
     "Helping patients and families understand hospital bills with clear explanations, "
