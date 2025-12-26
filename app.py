@@ -26,6 +26,7 @@ except Exception:
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel("models/gemini-2.0-flash")
 
+
 def extract_json(text):
     try:
         start = text.find("{")
@@ -55,16 +56,34 @@ def safe_gemini(prompt):
 # CUSTOM CSS FOR BEAUTIFUL STYLING
 st.markdown("""
 <style>
-    /* Import Google Fonts for a clean, professional look */
-    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+    /* Import Google Fonts for varied font styles */
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Poppins:wght@300;400;600&display=swap');
     
-    /* Global body styling */
+    /* Full-page background with subtle pattern overlay */
     body {
         font-family: 'Roboto', sans-serif;
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        background-attachment: fixed;
+        background-size: cover;
+        position: relative;
         color: #333;
         margin: 0;
         padding: 0;
+    }
+    
+    /* Subtle background pattern for depth */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                          radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+        background-size: 400px 400px;
+        pointer-events: none;
+        z-index: -1;
     }
     
     /* Main container */
@@ -77,17 +96,20 @@ st.markdown("""
         max-width: 1200px;
     }
     
-    /* Title styling */
+    /* Title styling with varied font */
     .stTitle {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
         color: #2c3e50;
-        font-weight: 700;
         text-align: center;
         font-size: 2.5em;
         margin-bottom: 10px;
     }
     
-    /* Caption styling */
+    /* Caption styling with lighter weight */
     .stCaption {
+        font-family: 'Roboto', sans-serif;
+        font-weight: 300;
         color: #7f8c8d;
         font-style: italic;
         text-align: center;
@@ -123,10 +145,11 @@ st.markdown("""
         font-weight: 500;
     }
     
-    /* Subheader styling */
+    /* Subheader styling with varied font */
     .stSubheader {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 400;
         color: #34495e;
-        font-weight: 600;
         border-left: 5px solid #2ecc71;
         padding-left: 15px;
         margin-top: 30px;
