@@ -11,6 +11,107 @@ st.set_page_config(
     page_icon="🏥",
     layout="centered"
 )
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Global font & background */
+html, body, [class*="css"] {
+    font-family: 'Inter', sans-serif;
+    background-color: #F8FAFC;
+    color: #0F172A;
+}
+
+/* Main page spacing */
+.block-container {
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
+    max-width: 900px;
+}
+
+/* Headings */
+h1 {
+    font-weight: 700;
+    color: #0F172A;
+}
+
+h2, h3 {
+    font-weight: 600;
+    color: #1E293B;
+}
+
+h4, h5, h6 {
+    font-weight: 600;
+    color: #334155;
+}
+
+/* Subtle divider */
+hr {
+    border: none;
+    height: 1px;
+    background-color: #E2E8F0;
+    margin: 2rem 0;
+}
+
+/* Buttons */
+.stButton > button {
+    background-color: #2563EB;
+    color: white;
+    border-radius: 12px;
+    padding: 0.6rem 1.4rem;
+    font-weight: 600;
+    border: none;
+    transition: all 0.15s ease-in-out;
+}
+
+.stButton > button:hover {
+    background-color: #1D4ED8;
+    transform: translateY(-1px);
+}
+
+/* Metrics */
+[data-testid="stMetric"] {
+    background: white;
+    padding: 1.2rem;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+}
+
+/* Cards / containers */
+[data-testid="stVerticalBlock"] > div:has(> .element-container) {
+    background: white;
+    border-radius: 18px;
+    padding: 1.4rem 1.6rem;
+    margin-bottom: 1.6rem;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+}
+
+/* Info / warning / success boxes */
+.stAlert {
+    border-radius: 14px;
+    font-size: 0.95rem;
+}
+
+/* Text areas */
+textarea {
+    border-radius: 12px !important;
+    border: 1px solid #CBD5F5 !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* Select boxes & checkboxes */
+select, input {
+    border-radius: 10px !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* Captions */
+.stCaption {
+    color: #64748B;
+    font-size: 0.85rem;
+}
+</style>
+""", unsafe_allow_html=True)
 
 # W&B INIT
 try:
