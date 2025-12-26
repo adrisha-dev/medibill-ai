@@ -37,6 +37,7 @@ def extract_json(text):
 
 # DATABASE
 def get_bill_items():
+    st.write("DB path:", os.path.abspath("medibill.db"))
     conn = sqlite3.connect("medibill.db")
     cur = conn.cursor()
     cur.execute("SELECT item_name, category, cost FROM bill_items")
