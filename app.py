@@ -5,18 +5,14 @@ import os
 import json
 import wandb
 
-# =====================================================
 # PAGE CONFIG
-# =====================================================
 st.set_page_config(
     page_title="MediBill AI",
     page_icon="🏥",
     layout="centered"
 )
 
-# =====================================================
-# W&B INIT (never blocks app)
-# =====================================================
+# W&B INIT
 try:
     wandb.init(
         project="medibill-ai",
@@ -26,15 +22,11 @@ try:
 except Exception:
     pass
 
-# =====================================================
 # GEMINI SETUP
-# =====================================================
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 model = genai.GenerativeModel("models/gemini-2.0-flash")
 
-# =====================================================
-# JSON PARSER
-# =====================================================
+
 def extract_json(text):
     try:
         start = text.find("{")
@@ -43,9 +35,7 @@ def extract_json(text):
     except Exception:
         return None
 
-# =====================================================
 # DATABASE
-# =====================================================
 def get_bill_items():
     conn = sqlite3.connect("medibill.db")
     cur = conn.cursor()
@@ -57,9 +47,6 @@ def get_bill_items():
         for r in rows
     ]
 
-# =====================================================
-# SAFE GEMINI CALL (called ONCE per item)
-# =====================================================
 def safe_gemini(prompt):
     try:
         return model.generate_content(prompt).text
@@ -77,9 +64,7 @@ st.caption(
 
 st.divider()
 
-# =====================================================
-# USER OPTIONS (RESTORED UI)
-# =====================================================
+# USER OPTIONS 
 col1, col2 = st.columns(2)
 
 with col1:
@@ -93,10 +78,8 @@ with col2:
         "👨‍👩‍👧 Explain in simple, family-friendly terms"
     )
 
-# =====================================================
-# INSURANCE LEGEND (RESTORED UI)
-# =====================================================
-st.markdown("### 🛡️ Insurance Coverage Guide")
+# INSURANCE LEGEND
+st.markdown("---🛡️ Insurance Coverage Guide ---")
 
 l1, l2, l3 = st.columns(3)
 l1.markdown("🟢 **Likely Covered**  \nUsually included in standard policies")
@@ -105,17 +88,13 @@ l3.markdown("🔴 **Not Covered**  \nOften excluded from insurance")
 
 st.divider()
 
-# =====================================================
 # BILL DATA
-# =====================================================
 items = get_bill_items()
 st.metric("💰 Total Hospital Bill So Far (₹)", sum(i["cost"] for i in items))
 
 st.divider()
 
-# =====================================================
 # MAIN LOOP
-# =====================================================
 for i in items:
     item = i["item"]
     key_explain = f"explain_{item}"
@@ -127,7 +106,7 @@ for i in items:
 
     colA, colB = st.columns(2)
 
-    # ---------------- IMAGE BUTTON (RESTORED UI)
+    # IMAGE BUTTON 
     if colA.button("🖼️ Learn what this medicine/procedure looks like", key=f"img_{item}"):
         if key_image not in st.session_state:
             img_prompt = f"""
@@ -154,7 +133,7 @@ Flat medical illustration, clean environment, no patients, no blood.
                 "not for diagnosis or treatment."
             )
 
-    # ---------------- EXPLAIN BUTTON (RESTORED UI)
+    # EXPLAIN BUTTON 
     if colB.button("🧠 Understand this charge & insurance coverage", key=f"exp_{item}"):
         if key_explain not in st.session_state:
             lang_rule = (
@@ -186,7 +165,7 @@ JSON only:
             raw = safe_gemini(explain_prompt)
             st.session_state[key_explain] = extract_json(raw) if raw else "FAILED"
 
-    # ---------------- DISPLAY EXPLANATION
+    # DISPLAY EXPLANATION
     if key_explain in st.session_state:
         result = st.session_state[key_explain]
 
@@ -223,9 +202,7 @@ JSON only:
 
     st.divider()
 
-# =====================================================
-# FOOTER (RESTORED)
-# =====================================================
+# FOOTER 
 st.caption(
     "MediBill AI is an educational tool designed to improve transparency in hospital billing. "
     "All information provided is for awareness and discussion purposes only."
