@@ -229,7 +229,7 @@ def get_bill():
     ]
 
 def safely_call_gemini(prompt):
-     """
+    """
     Small wrapper around the AI call to avoid breaking
     the app if the API times out or errors.
     """
