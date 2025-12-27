@@ -8,7 +8,7 @@ Hey, I’m Adrisha, a computer science student who enjoys building projects that
 ---
 
 ## 🩺 Problem Statement
-Hospital bills often come as a shock, not just because they are expensive, but because they are unclear. In many private hospitals, families only see the full bill at the time of discharge, while charges for medicines, tests, and procedures quietly add up in the background. By the end, people are left staring at unfamiliar medical terms with no real understanding of what they are paying for or how insurance applies. This leaves a deep mark of confusion, stress, and mistrust at a time when clarity matters the most.
+Hospital bills often come as a shock, not just because they are expensive, but because they are unclear. In many private hospitals, families only see the full bill at the time of discharge, while charges for medicines, tests and procedures quietly add up in the background. By the end, people are left staring at unfamiliar medical terms with no real understanding of what they are paying for or how insurance applies. This leaves a deep mark of confusion, stress and mistrust at a time when clarity matters the most.
 
 ---
 ## 💡 How Does MediBill AI Solve This Problem?
@@ -55,6 +55,7 @@ It does **not** provide medical or insurance advice and does not replace profess
 ---
 ## 📌 Closing Note
 MediBill AI is a step toward making hospital billing more transparent, understandable, and patient-friendly—especially during times when patients and families need clarity the most.
+
 
 
 
