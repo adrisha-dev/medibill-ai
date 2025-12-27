@@ -382,7 +382,7 @@ JSON only:
                     "family_mode": family_mode
                 })
             except Exception:
-                pass
+                 pass
 
     st.divider()
 
