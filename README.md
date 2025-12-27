@@ -20,7 +20,8 @@ I built MediBill AI with a patient-priority mindset, focusing on making hospital
 - Offering a **family-friendly explanation mode** designed for non-medical users  
 - Indicating whether a charge is **likely covered, partially covered, or not covered by insurance**  
 - Providing **educational visual explanations** to help users understand medicines and procedures  
-- Supporting **multiple languages**, allowing families to access information in the language they are most comfortable with  
+- Supporting **multiple languages**, allowing families to access information in the language they are most comfortable with
+- **Mobile responsive UI** for accessing anytime and anywhere
 ---
 ## 🛠️ Tech Stack Used
 
@@ -56,6 +57,7 @@ It does **not** provide medical or insurance advice and does not replace profess
 ---
 ## 📌 Closing Note
 MediBill AI is a step toward making hospital billing more transparent, understandable and patient-friendly.
+
 
 
 
