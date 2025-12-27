@@ -1,10 +1,8 @@
 # 🏥 MediBill AI
-
 MediBill AI is a patient-centric web application designed to bring transparency and clarity to hospital billing. It helps patients and families understand medical charges in real time, instead of being surprised by a large and confusing bill at the time of discharge.
 
 ---
-##👋 About Me
-
+## 👋 About Me
 Hey, I’m Adrisha, a computer science student who enjoys building projects that solve real, everyday problems using technology. MediBill AI was inspired by observing how confusing and stressful hospital billing can be for patients and their families.
 
 ---
@@ -48,13 +46,16 @@ The demo video demonstrates:
 - Multilingual and family-friendly features  
 
 For a more detailed explanation of the approach, scalability and future scope, please refer to the accompanying project write-up.
+
 ---
 ## ⚠️ Disclaimer
 MediBill AI is an educational and transparency-focused tool.  
 It does **not** provide medical or insurance advice and does not replace professional consultation.
+
 ---
 ## 📌 Closing Note
 MediBill AI is a step toward making hospital billing more transparent, understandable, and patient-friendly—especially during times when patients and families need clarity the most.
+
 
 
 
