@@ -54,7 +54,7 @@ It does **not** provide medical or insurance advice and does not replace profess
 
 ---
 ## 📌 Closing Note
-MediBill AI is a step toward making hospital billing more transparent, understandable, and patient-friendly—especially during times when patients and families need clarity the most.
+MediBill AI is a step toward making hospital billing more transparent, understandable and patient-friendly.
 
 
 
